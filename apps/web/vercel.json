@@ -1,0 +1,5 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && npm run build -w @brightstore/web",
+  "installCommand": "cd ../.. && npm install"
+}

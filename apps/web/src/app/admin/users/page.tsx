@@ -1,0 +1,2 @@
+import { AdminTable } from "@/components/admin-table";
+export default function Page(){return <AdminTable title="Users" description="Customer activity, trust, and account administration." columns={["User","Email","Orders","LTV","Last active","Status"]} rows={[["Aarav Sharma","aarav@example.com","42","₹18,420","Now","Active"],["Meera Iyer","meera@example.com","31","₹14,210","4m","Active"],["Kabir Singh","kabir@example.com","18","₹8,902","2h","Active"],["Unknown account","risk@example.com","8","₹22,400","Now","Flagged"]]}/>}

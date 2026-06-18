@@ -1,0 +1,10 @@
+import { Clock3, MapPin, Search, ShieldCheck, Star } from "lucide-react";
+import { products } from "@/lib/data";
+import { ProductCard } from "@/components/product-card";
+import { Button, Pill } from "@/components/ui";
+
+export default function StorePage() {
+  return <div><section className="border-b bg-gradient-to-br from-brand-50 to-white py-12 dark:border-slate-800 dark:from-brand-900/20 dark:to-slate-950"><div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-center lg:px-8"><div className="grid size-24 place-items-center rounded-3xl bg-gradient-to-br from-brand-400 to-brand-700 font-display text-4xl font-black text-white shadow-glow">G</div><div className="flex-1"><Pill>Verified local retailer</Pill><h1 className="mt-3 font-display text-4xl font-extrabold">Gupta General Store</h1><div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-500"><span className="flex items-center gap-1"><Star size={15} className="fill-amber-400 text-amber-400"/>4.9 (1.2k)</span><span className="flex items-center gap-1"><MapPin size={15}/>0.8 km</span><span className="flex items-center gap-1"><Clock3 size={15}/>18–24 min</span><span className="flex items-center gap-1"><ShieldCheck size={15}/>BRIGHT verified</span></div></div><Button variant="secondary">Store details</Button></div></section>
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><label className="flex h-12 max-w-xl items-center gap-3 rounded-xl bg-slate-100 px-4 text-slate-500 dark:bg-slate-900"><Search size={18}/><input className="w-full bg-transparent text-sm outline-none" placeholder="Search in Gupta General Store"/></label><div className="mt-8 flex gap-2 overflow-x-auto">{["All products","Best deals","Staples","Dairy","Snacks","Home care"].map((x,i)=><button key={x} className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold ${i===0?"bg-ink text-white dark:bg-white dark:text-ink":"border dark:border-slate-700"}`}>{x}</button>)}</div><div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">{products.map((p)=><ProductCard key={p.id} product={{...p,store:"Gupta General Store"}}/>)}</div></div>
+  </div>;
+}

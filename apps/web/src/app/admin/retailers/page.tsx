@@ -1,0 +1,2 @@
+import { AdminTable } from "@/components/admin-table";
+export default function Page(){return <AdminTable title="Retailers" description="Approve, monitor, and support marketplace partners." columns={["Retailer","City","Stores","GMV","Joined","Status"]} rows={[["Gupta Retail Pvt Ltd","Bengaluru","3","₹8.4L","12 Jan","Active"],["Sharma Supermart","Delhi","1","—","Today","Pending review"],["Green Leaf Organics","Mumbai","2","₹2.1L","8 May","Active"],["Daily Needs Hub","Hyderabad","1","—","Yesterday","Pending review"]]}/>}

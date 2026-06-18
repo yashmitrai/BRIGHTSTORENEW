@@ -1,0 +1,2 @@
+import { AdminTable } from "@/components/admin-table";
+export default function Page(){return <AdminTable title="Fraud monitoring" description="Risk-ranked signals requiring human review." columns={["Signal","Entity","Risk","Amount","Detected","Status"]} rows={[["Velocity anomaly","risk@example.com","High","₹22,400","3m","Review now"],["Repeated cancellation","Store #982","Medium","₹8,120","18m","In review"],["Price spike","Inventory #4421","Medium","₹4,800","1h","Review now"],["Duplicate device","User #82118","Low","—","2h","Dismissed"]]}/>}

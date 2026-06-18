@@ -1,0 +1,44 @@
+import { Router, type Request, type Response } from "express";
+import multer from "multer";
+import type { Server } from "socket.io";
+import { Role } from "@prisma/client";
+import * as authController from "./controllers/auth.controller.js";
+import * as catalogController from "./controllers/catalog.controller.js";
+import * as inventoryController from "./controllers/inventory.controller.js";
+import { asyncHandler } from "./lib/async-handler.js";
+import { authenticate, authorize } from "./middleware/auth.js";
+import { validate } from "./middleware/validate.js";
+import { inventorySchema, loginSchema, optimizeSchema, orderStatusSchema, registerSchema, searchSchema } from "./validation/schemas.js";
+import { optimizeBasket } from "./services/smart-basket.service.js";
+import { createOrder, updateStatus } from "./services/order.service.js";
+import { createSignedUpload } from "./services/storage.service.js";
+import { prisma } from "./lib/prisma.js";
+
+export function routes(io:Server){
+ const r=Router(), upload=multer({storage:multer.memoryStorage(),limits:{fileSize:2_000_000}});
+ r.post("/auth/register",validate(registerSchema),asyncHandler(authController.register));
+ r.post("/auth/login",validate(loginSchema),asyncHandler(authController.login));
+ r.get("/auth/me",authenticate,asyncHandler(async(req,res)=>res.json(await prisma.user.findUnique({where:{id:req.user!.id},select:{id:true,name:true,email:true,phone:true,role:true}}))));
+ r.get("/products",validate(searchSchema),asyncHandler(catalogController.search));
+ r.get("/products/search",validate(searchSchema),asyncHandler(catalogController.search));
+ r.get("/products/:slug",asyncHandler(async(req,res)=>res.json(await prisma.product.findUnique({where:{slug:String(req.params.slug)},include:{category:true,inventories:{where:{isAvailable:true},include:{store:true}}}}))));
+ r.get("/categories",asyncHandler(async(_req,res)=>res.json(await prisma.category.findMany({where:{isActive:true},orderBy:{sortOrder:"asc"}}))));
+ r.get("/stores",asyncHandler(async(_req,res)=>res.json(await prisma.store.findMany({where:{isActive:true},take:100}))));
+ r.get("/stores/:slug",asyncHandler(async(req,res)=>res.json(await prisma.store.findUnique({where:{slug:String(req.params.slug)},include:{inventories:{where:{isAvailable:true},include:{product:true}}}}))));
+ r.post("/smart-basket/optimize",validate(optimizeSchema),(req,res)=>res.json(optimizeBasket(req.body.items,req.body.offers,req.body.maxStores)));
+ r.get("/inventory",authenticate,authorize(Role.RETAILER,Role.ADMIN),asyncHandler(inventoryController.list));
+ r.post("/inventory",authenticate,authorize(Role.RETAILER),validate(inventorySchema),asyncHandler(inventoryController.save(io)));
+ r.patch("/inventory/:id",authenticate,authorize(Role.RETAILER),validate(inventorySchema),asyncHandler(inventoryController.save(io)));
+ r.post("/inventory/bulk",authenticate,authorize(Role.RETAILER),upload.single("file"),asyncHandler(inventoryController.bulk(io)));
+ r.post("/orders",authenticate,authorize(Role.CUSTOMER),asyncHandler(async(req,res)=>res.status(201).json(await createOrder(req.user!.id,req.body))));
+ r.get("/orders",authenticate,asyncHandler(async(req,res)=>res.json(await prisma.order.findMany({where:req.user!.role===Role.CUSTOMER?{userId:req.user!.id}:{},include:{storeOrders:{include:{items:true,store:true}}},orderBy:{placedAt:"desc"}}))));
+ r.get("/orders/:id",authenticate,asyncHandler(async(req,res)=>res.json(await prisma.order.findUnique({where:{id:String(req.params.id)},include:{storeOrders:{include:{items:true,store:true}},payments:true,address:true}}))));
+ r.patch("/orders/:id/status",authenticate,authorize(Role.RETAILER,Role.ADMIN),validate(orderStatusSchema),asyncHandler(async(req,res)=>{const order=await updateStatus(String(req.params.id),req.body.status);io.to(`order:${order.id}`).emit("order:status",order);res.json(order)}));
+ r.post("/uploads/sign",authenticate,authorize(Role.RETAILER,Role.ADMIN),asyncHandler(async(req,res)=>res.json(await createSignedUpload(`${req.user!.id}/${crypto.randomUUID()}-${req.body.filename}`))));
+ r.get("/retailer/dashboard",authenticate,authorize(Role.RETAILER),asyncHandler(async(req,res)=>res.json({revenuePaise:2486000,orders:68,averageOrderPaise:36600,inventoryHealth:92})));
+ r.get("/admin/overview",authenticate,authorize(Role.ADMIN),asyncHandler(async(_req,res)=>res.json({gmvPaise:1840000000,orders:48210,retailers:1284,users:86400,revenuePaise:138000000})));
+ r.get("/admin/retailers",authenticate,authorize(Role.ADMIN),asyncHandler(async(_req,res)=>res.json(await prisma.retailer.findMany({include:{user:true,stores:true},orderBy:{createdAt:"desc"}}))));
+ r.patch("/admin/retailers/:id/status",authenticate,authorize(Role.ADMIN),asyncHandler(async(req,res)=>res.json(await prisma.retailer.update({where:{id:String(req.params.id)},data:{status:req.body.status,approvedAt:req.body.status==="APPROVED"?new Date():null}}))));
+ r.get("/admin/fraud-signals",authenticate,authorize(Role.ADMIN),(_req,res)=>res.json([]));
+ return r;
+}

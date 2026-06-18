@@ -1,0 +1,2 @@
+import { AdminTable } from "@/components/admin-table";
+export default function Page(){return <AdminTable title="Orders" description="Cross-store order health and fulfilment exceptions." columns={["Order","Customer","Stores","Total","Created","Status"]} rows={[["#BS-4821","Aarav Sharma","2","₹684","2m","Packing"],["#BS-4820","Meera Iyer","1","₹1,240","5m","Ready"],["#BS-4819","Kabir Singh","3","₹318","18m","Delivered"],["#BS-4818","Sana Khan","1","₹892","24m","Delivered"]]}/>}

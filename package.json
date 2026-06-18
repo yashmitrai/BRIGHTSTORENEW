@@ -1,0 +1,25 @@
+{
+  "name": "brightstore",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently -n web,api -c green,cyan \"npm run dev -w @brightstore/web\" \"npm run dev -w @brightstore/api\"",
+    "build": "npm run build -w @brightstore/api && npm run build -w @brightstore/web",
+    "lint": "npm run lint -w @brightstore/web",
+    "typecheck": "npm run typecheck -w @brightstore/api && npm run typecheck -w @brightstore/web",
+    "test": "npm test -w @brightstore/api",
+    "db:generate": "npm run db:generate -w @brightstore/api",
+    "db:migrate": "npm run db:migrate -w @brightstore/api",
+    "db:seed": "npm run db:seed -w @brightstore/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "overrides": {
+    "postcss": "8.5.10"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

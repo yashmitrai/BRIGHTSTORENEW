@@ -1,0 +1,2 @@
+import { AdminTable } from "@/components/admin-table";
+export default function Page(){return <AdminTable title="Subscriptions" description="Retailer plans, recurring revenue, and billing state." columns={["Retailer","Plan","MRR","Renewal","Stores","Status"]} rows={[["Gupta Retail","Growth","₹4,999","1 Jul","3","Active"],["Fresh Basket","Scale","₹9,999","4 Jul","8","Active"],["Apna Bazaar","Starter","₹1,499","12 Jul","1","Active"],["Nature's Cart","Growth","₹4,999","18 Jun","2","Payment due"]]}/>}
